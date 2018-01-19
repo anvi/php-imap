@@ -842,9 +842,11 @@ class Mailbox {
 		if(!is_array($args)) {
 			$args = [$args];
 		}
-		foreach($args as &$arg) {
-			if(is_string($arg)) {
-				$arg = imap_utf7_encode($arg);
+		if ($methodShortName !== 'rfc822_parse_headers') {
+			foreach($args as &$arg) {
+				if(is_string($arg)) {
+					$arg = imap_utf7_encode($arg);
+				}
 			}
 		}
 		if($prependConnectionAsFirstArg) {
@@ -856,7 +858,7 @@ class Mailbox {
 
 		if(!$result) {
 			$errors = imap_errors();
-			if($errors) {
+			if($errors && $errors[0] != 'SECURITY PROBLEM: insecure server advertised AUTH=PLAIN') {
 				if($throwExceptionClass) {
 					throw new $throwExceptionClass("IMAP method imap_$methodShortName() failed with error: " . implode('. ', $errors));
 				}
